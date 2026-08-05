@@ -1,0 +1,49 @@
+Projeto do banco:
+
+create table cliente(
+id int auto_increment primary key,
+nome varchar(100) not null,
+telefone varchar(20) not null,
+email varchar(100) not null unique,
+senha varchar(255) not null)
+
+create table dono(
+id int auto_increment primary key,
+nome varchar(100) not null,
+telefone varchar(20) not null,
+email varchar(100) not null unique,
+senha varchar(255) not null)
+
+create table quadra(
+id int auto_increment primary key,
+nome varchar(100) not null,
+tipo varchar(20) not null,
+duracao_minima_minutos int not null,
+preco_periudo decimal(10,2) not null,
+localizacao_cidade varchar(25) not null,
+localizacao_rua varchar(100) not null,
+abertura time not null,
+fechamento time not null,
+dias_funcionamento set('0','1','2','3','4','5','6') not null,
+ativo boolean default true,
+dono_id int not null,
+foreign key (dono_id) references dono(id))
+
+create table agendamento(
+id int auto_increment primary key,
+quadra_id int not null,
+cliente_id int not null,
+valor_total decimal(10,2) not null,
+data_inicio datetime not null,
+data_fim datetime not null, 
+status enum('pendente','confirmado','cancelado','finalizado') default 'pendente',
+cancelador enum('cliente','dono'),
+data_cancelamento datetime,
+foreign key (quadra_id) references quadra(id),
+foreign key (cliente_id) references cliente(id))
+
+create table imagens(
+id int auto_increment primary key,
+imagem varchar(255) not null,
+quadra_id int not null,
+foreign key (quadra_id) references quadra(id))
