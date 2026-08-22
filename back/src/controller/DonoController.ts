@@ -1,6 +1,6 @@
 import donoModel from '../model/DonoModel.js'
 import { Request, Response } from 'express';
-import { donoBase } from '../interfaces/DonoInterface.js';
+import { donoBase, cadastrarQuadraBody } from '../interfaces/DonoInterface.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -43,6 +43,9 @@ const criarConta = async (req: Request<{}, {}, donoBase>, res: Response) => {
     }
 }
 
+const cadastrarQuadra = async (req: Request<{}, {}, cadastrarQuadraBody>, res: Response) => {
+    
+}
 //PUT
 
 //DELETE

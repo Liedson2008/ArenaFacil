@@ -1,6 +1,6 @@
 import db from '../config/db.js';
 import { ResultSetHeader } from 'mysql2';
-import { donoLogin, donoBase, quadraBase } from '../interfaces/DonoInterface.js';
+import { donoLogin, donoBase, quadraBase, imagem } from '../interfaces/DonoInterface.js';
 
 //GET
 
@@ -33,6 +33,15 @@ const cadastrarQuadra = async (dados: quadraBase) => {
     return resultado.insertId;
 }
 
+const cadastrarImagem = async (imagems: imagem) => {
+    const { rota, quadra_id } = imagems;
+    const [resposta] = await db.query<ResultSetHeader>(
+        'INSERT INTO imagem(imagem, quadra_id) VALUES (?, ?)',
+        [rota, quadra_id]
+    )
+    return resposta.insertId;
+}
+
 //PUT
 
 
@@ -46,7 +55,8 @@ const cadastrarQuadra = async (dados: quadraBase) => {
 const donoModel = {
     criarConta,
     buscarParaLogin,
-    cadastrarQuadra
+    cadastrarQuadra,
+    cadastrarImagem
 }
 
 export default donoModel;
