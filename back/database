@@ -42,7 +42,7 @@ data_cancelamento datetime,
 foreign key (quadra_id) references quadra(id),
 foreign key (cliente_id) references cliente(id))
 
-create table imagens(
+create table imagem(
 id int auto_increment primary key,
 imagem varchar(255) not null,
 quadra_id int not null,

@@ -27,19 +27,18 @@ const criarConta = async (dados: donoBase) => {
 const cadastrarQuadra = async (dados: quadraBase) => {
     const { nome, tipo, duracao_minima_minutos, preco_periudo, localizacao_cidade, localizacao_rua, abertura, fechamento, dias_funcionamento, dono_id } = dados;
     const [resultado] = await db.query<ResultSetHeader>(
-        'INSERT INTO quadra VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [null, nome, tipo, duracao_minima_minutos, preco_periudo, localizacao_cidade, localizacao_rua, abertura, fechamento, dias_funcionamento, dono_id]
+        'INSERT INTO quadra(nome, tipo, duracao_minima_minutos, preco_periudo, localizacao_cidade, localizacao_rua, abertura, fechamento, dias_funcionamento, dono_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [nome, tipo, duracao_minima_minutos, preco_periudo, localizacao_cidade, localizacao_rua, abertura, fechamento, dias_funcionamento, dono_id]
     )
     return resultado.insertId;
 }
 
-const cadastrarImagem = async (imagems: imagem) => {
-    const { rota, quadra_id } = imagems;
-    const [resposta] = await db.query<ResultSetHeader>(
-        'INSERT INTO imagem(imagem, quadra_id) VALUES (?, ?)',
-        [rota, quadra_id]
-    )
-    return resposta.insertId;
+const cadastrarImagem = async (rotas: string[], quadra_id: number) => {
+    for (const rota of rotas) {
+        await db.query('INSERT INTO imagem(rota, quadra_id) VALUES(?, ?)',
+            [rota, quadra_id]
+        )
+    }
 }
 
 //PUT

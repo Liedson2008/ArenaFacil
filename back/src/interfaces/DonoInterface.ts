@@ -22,15 +22,10 @@ export interface quadraBase {
      preco_periudo: number;
      localizacao_cidade: string;
      localizacao_rua: string;
-     abertura: number;
-     fechamento: number;
-     dias_funcionamento: number;
+     abertura: string;
+     fechamento: string;
+     dias_funcionamento: string;
      dono_id: number;
-}
-
-export interface imagem {
-     rota: string,
-     quadra_id: number
 }
 
 export interface cadastrarQuadraBody {
@@ -45,3 +40,9 @@ export interface cadastrarQuadraBody {
      dias_funcionamento: string;
      dono_id: string;
 }
+
+export interface imagem {
+     rota: string,
+     quadra_id: number
+}
+
