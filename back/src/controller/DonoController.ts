@@ -1,9 +1,8 @@
 import donoModel from '../model/DonoModel.js'
 import { Request, Response } from 'express';
-import { donoBase, cadastrarQuadraBody, quadraBase } from '../interfaces/DonoInterface.js';
+import { donoBase } from '../interfaces/DonoInterface.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import multer from 'multer';
 
 //GET
 
@@ -44,36 +43,7 @@ const criarConta = async (req: Request<{}, {}, donoBase>, res: Response) => {
     }
 }
 
-const cadastrarQuadra = async (req: Request<{}, {}, cadastrarQuadraBody>, res: Response) => {
-    const { nome, tipo, duracao_minima_minutos, preco_periudo, localizacao_cidade, localizacao_rua, abertura, fechamento, dias_funcionamento } = req.body;
-    const dono_id = 1
-    const dados: quadraBase = {
-        nome,
-        tipo,
-        duracao_minima_minutos: Number(duracao_minima_minutos),
-        preco_periudo: Number(preco_periudo),
-        localizacao_cidade,
-        localizacao_rua,
-        abertura: abertura,
-        fechamento: fechamento,
-        dias_funcionamento: dias_funcionamento,
-        dono_id: Number(dono_id),
-    }
-    try {
-        const quadra_id = await donoModel.cadastrarQuadra(dados);
-        const imagens = req.files as Express.Multer.File[];
 
-        if (imagens && imagens.length > 0) {
-            const rotas = imagens.map((i) => `/uploads/fotosQuadra/${i.filename}`)
-            await donoModel.cadastrarImagem(rotas, Number(quadra_id));
-        }
-
-        return res.status(200).json({ message: 'quadra cadastrada com sucesso' })
-    } catch (error) {
-        console.error('erro no servidor', error)
-        return res.status(500).json({ message: 'erro interno no servidor, por favor tente novamente mais tarde' })
-    }
-}
 //PUT
 
 //DELETE
@@ -82,7 +52,6 @@ const cadastrarQuadra = async (req: Request<{}, {}, cadastrarQuadraBody>, res: R
 
 const donoController = {
     criarConta,
-    login,
-    cadastrarQuadra
+    login
 }
 export default donoController;
