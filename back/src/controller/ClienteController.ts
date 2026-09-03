@@ -28,6 +28,23 @@ const login = async (req: Request<{}, {}, { email: string, senha: string }>, res
 
 //PUSH
 
+const agendarQuadra = async (req: Request<{ quadra_id: number }, {}, { data_inicio: string, data_fim: string, valor_total: number }>, res: Response) => {
+    const { quadra_id } = req.params;
+    const cliente_id = 1;
+    const dados = { ...req.body, quadra_id, cliente_id };
+    try {
+        const conflito = await clienteModel.verificarConflito(quadra_id, dados.data_inicio, dados.data_fim);
+        if (conflito) {
+            return res.status(409).json({ message: 'algem ja agendou este horario, por favor escolha outro horario' });
+        }
+        const id = await clienteModel.agendarQuadra(dados);
+        return res.status(201).json({ message: 'agendamento realizado com sucesso' });
+    } catch (error) {
+        console.error('erro no servidor', error);
+        return res.status(500).json({ message: 'erro interno no servidor, tente novamente mais tarde' })
+    }
+}
+
 const criarConta = async (req: Request<{}, {}, clienteBase>, res: Response) => {
     const { senha } = req.body;
     const senhaCriptografada = await bycrypt.hash(senha, 10);
@@ -53,6 +70,7 @@ const criarConta = async (req: Request<{}, {}, clienteBase>, res: Response) => {
 
 const clienteController = {
     criarConta,
-    login
+    login,
+    agendarQuadra
 }
 export default clienteController;
