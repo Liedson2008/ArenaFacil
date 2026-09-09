@@ -30,7 +30,7 @@ const login = async (req: Request<{}, {}, { email: string, senha: string }>, res
 
 const agendarQuadra = async (req: Request<{ quadra_id: number }, {}, { data_inicio: string, data_fim: string, valor_total: number }>, res: Response) => {
     const { quadra_id } = req.params;
-    const cliente_id = 1;
+    const cliente_id = req.usuario!.id;
     const dados = { ...req.body, quadra_id, cliente_id };
     try {
         const conflito = await clienteModel.verificarConflito(quadra_id, dados.data_inicio, dados.data_fim);

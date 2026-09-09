@@ -36,7 +36,7 @@ const cadastrarQuadra = async (req: Request<{}, {}, cadastrarQuadraBody>, res: R
         const imagens = req.files as Express.Multer.File[];
 
         if (imagens && imagens.length > 0) {
-            const rotas = imagens.map((i) => `/uploads/fotosQuadra/${i.filename}`)
+            const rotas = imagens.map((i) => `/uploads/fotosQuadras/${i.filename}`)
             await quadraModel.cadastrarImagem(rotas, Number(quadra_id));
         }
 

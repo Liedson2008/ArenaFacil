@@ -15,19 +15,29 @@ const aleatorizaçãoQuadras = async () => {
         const arr = [...array]
         for (let i = arr.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [arr[j], arr[i] = arr[i], arr[j]]
+            [arr[i], arr[j]] = [arr[j], arr[i]]
         }
         return arr;
     }
 
     const idsSorteados = shuffle(todosIds).slice(0, 10)
 
-    const [quadrasSorteadas] = await db.query<quadraCompleta[]>(
+    const [quadras] = await db.query<quadraCompleta[]>(
         'SELECT id, nome, tipo, duracao_minima_minutos, preco_periudo, localizacao_cidade, localizacao_rua, abertura, fechamento, dias_funcionamento, dono_id FROM quadra WHERE id IN (?)',
         [idsSorteados]
     )
 
-    return quadrasSorteadas;
+    const [imagens] = await db.query<(RowDataPacket & { rota: string, quadra_id: number })[]>(
+        'SELECT rota, quadra_id FROM imagem WHERE quadra_id IN (?)',
+        [idsSorteados]
+    )
+
+    const quadrasComImagem = quadras.map((quadra) => ({
+        ...quadra,
+        imagens: imagens.filter((img) => img.quadra_id === quadra.id).map((img) => img.rota)
+    }))
+
+    return quadrasComImagem;
 }
 
 const buscarQuadra = async (id: number) => {
