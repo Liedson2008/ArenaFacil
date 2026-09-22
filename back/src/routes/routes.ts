@@ -10,13 +10,15 @@ const route = express.Router();
 route.post('/dono/criar-conta', donoController.criarConta);
 route.post('/dono/login', donoController.login);
 route.post('/dono/cadastrar-quadra', upload.array('imagens',5), quadraController.cadastrarQuadra)
+route.get('/dono/agendamentos', donoController.agendamentosPendentes);
 
 
 //ROTAS CLIENTE
 route.post('/cliente/criar-conta', clienteController.criarConta);
 route.post('/cliente/login', clienteController.login);
-route.get('/cliente/home', quadraController.quadrasParaHome);
+route.get('/cliente/home', quadraController.quadrasHomeCliente);
 route.post('/cliente/agendar-quadra/:quadra_id', clienteController.agendarQuadra);
+route.get('/cliente/buscar', quadraController.buscarPorFiltro);
 
 
 //ROTAS SEM ESPECIFICAÇÂO DE USUARIO

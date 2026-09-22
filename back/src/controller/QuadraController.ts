@@ -1,10 +1,10 @@
 import quadraModel from "../model/QuadraModel.js";
 import { Request, Response } from 'express';
-import { quadraBase, cadastrarQuadraBody } from "../interfaces/QuadraInterface.js";
+import { quadraBase, cadastrarQuadraBody, filtro } from "../interfaces/QuadraInterface.js";
 
 //GET
 
-const quadrasParaHome = async (req: Request, res: Response) => {
+const quadrasHomeCliente = async (req: Request, res: Response) => {
     try {
         const quadras = await quadraModel.aleatorizaçãoQuadras();
         return res.status(200).json(quadras);
@@ -14,6 +14,17 @@ const quadrasParaHome = async (req: Request, res: Response) => {
     }
 }
 
+const buscarPorFiltro = async (req: Request<{}, {}, {}, filtro>, res: Response) => {
+    const { nome, tipo, localizacao_cidade, localizacao_rua, abertura, fechamento, dias_funcionamento } = req.query;
+    const dados = { nome: nome?.trim() || null, tipo: tipo?.trim() || null, localizacao_cidade: localizacao_cidade?.trim() || null, localizacao_rua: localizacao_rua?.trim() || null, abertura: abertura?.trim() || null, fechamento: fechamento?.trim() || null, dias_funcionamento: dias_funcionamento?.trim() || null }
+    try {
+        const [quadras] = await quadraModel.buscarPorFiltro(dados);
+        return res.status(200).json(quadras);
+    }catch (error) {
+        console.error('erro no servidor', error)
+        return res.status(500).json({ message: 'erro no servidor tente novamente mais tarde' })
+    }
+}
 //PUSH
 
 const cadastrarQuadra = async (req: Request<{}, {}, cadastrarQuadraBody>, res: Response) => {
@@ -53,7 +64,8 @@ const cadastrarQuadra = async (req: Request<{}, {}, cadastrarQuadraBody>, res: R
 
 const quadraController = {
     cadastrarQuadra,
-    quadrasParaHome
+    quadrasHomeCliente,
+    buscarPorFiltro
 }
 
 export default quadraController;

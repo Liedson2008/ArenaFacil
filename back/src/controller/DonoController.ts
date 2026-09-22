@@ -25,6 +25,17 @@ const login = async (req: Request<{}, {}, { email: string; senha: string }>, res
     }
 }
 
+const agendamentosPendentes = async (req: Request, res: Response) => {
+    const dono_id = 1;
+    try {
+        const agendamentos = await donoModel.agendamentosPendentes(dono_id);
+        return res.status(200).json(agendamentos);
+    } catch (error) {
+        console.error('erro no servidor', error);
+        return res.status(500).json({ menssage: 'erro no servidor tente novamente masi tarde' });
+    }
+}
+
 //PUSH
 
 const criarConta = async (req: Request<{}, {}, donoBase>, res: Response) => {
@@ -52,6 +63,7 @@ const criarConta = async (req: Request<{}, {}, donoBase>, res: Response) => {
 
 const donoController = {
     criarConta,
-    login
+    login,
+    agendamentosPendentes
 }
 export default donoController;

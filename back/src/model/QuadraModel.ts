@@ -1,12 +1,12 @@
 import db from "../config/db.js";
-import { quadraBase, quadraCompleta, buscarPorId } from "../interfaces/QuadraInterface.js";
+import { quadraBase, quadraCompleta, buscarPorId, filtro } from "../interfaces/QuadraInterface.js";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 
 //GET
 
 const aleatorizaçãoQuadras = async () => {
     const [idsRows] = await db.query<(RowDataPacket & { id: number })[]>(
-        'SELECT id FROM quadra'
+        'SELECT id FROM quadra WHERE ativo = 1'
     )
 
     const todosIds = idsRows.map(row => row.id)
@@ -41,11 +41,44 @@ const aleatorizaçãoQuadras = async () => {
 }
 
 const buscarQuadra = async (id: number) => {
-    const [resultado] = await db.query<buscarPorId[]>(
-        'SELECT nome, tipo, duracao_minima_minutos, preco_periudo, localizacao_cidade, localizacao_rua, abertura, fechamento, dias_funcionamento, dono_id FROM quadra WHERE id = ?',
+    const [quadra] = await db.query<buscarPorId[]>(
+        'SELECT id, nome, tipo, duracao_minima_minutos, preco_periudo, localizacao_cidade, localizacao_rua, abertura, fechamento, dias_funcionamento, dono_id FROM quadra WHERE id = ?',
         [id]
     )
-    return resultado[0];
+
+    const [imagens] = await db.query<(RowDataPacket & {rota: string})[]>(
+        'SELECT rota FROM imagem WHERE quadra_id = ?',
+        [id]
+    )
+
+    const quadraComImagem = {
+        ...quadra[0],
+        imagens
+    }
+
+    return quadraComImagem;
+
+}
+
+const buscarPorFiltro = async (dados: filtro) => {;
+    const [quadras] = await db.query<quadraCompleta[]>(
+        'SELECT id, nome, tipo, duracao_minima_minutos, preco_periudo, localizacao_cidade, localizacao_rua, abertura, fechamento, dias_funcionamento, dono_id FROM quadra WHERE ativo = 1 AND nome LIKE COALESCE(?, nome) AND tipo = COALESCE(?, tipo) AND localizacao_cidade = COALESCE(?, localizacao_cidade) AND localizacao_rua = COALESCE(?, localizacao_rua) AND abertura = COALESCE(?, abertura) AND fechamento = COALESCE(?, fechamento) AND dias_funcionamento = COALESCE(?, dias_funcionamento)',
+        [ dados.nome ? `%${dados.nome}%` : null, dados.tipo, dados.localizacao_cidade, dados.localizacao_rua, dados.abertura, dados.fechamento, dados.dias_funcionamento]
+    )
+
+    const ids = quadras.map((quadra) => quadra.id)
+
+    const [imagens] = await db.query<(RowDataPacket & { rota: string, quadra_id: number })[]>(
+        'SELECT rota, quadra_id FROM imagem WHERE quadra_id IN (?)',
+        [ids]
+    )
+
+    const quadrasComImagem = quadras.map((quadra) => ({
+        ...quadra,
+        imagens: imagens.filter((img) => img.quadra_id === quadra.id).map((img) => img.rota)
+    }))
+    
+    return quadrasComImagem;
 }
 //PUSH
 
@@ -74,7 +107,8 @@ const quadraModel = {
     cadastrarImagem,
     cadastrarQuadra,
     aleatorizaçãoQuadras,
-    buscarQuadra
+    buscarQuadra,
+    buscarPorFiltro
 }
 
 export default quadraModel;

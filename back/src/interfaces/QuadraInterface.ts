@@ -31,3 +31,13 @@ export interface quadraCompleta extends quadraBase, RowDataPacket {
 }
 
 export interface buscarPorId extends quadraBase, RowDataPacket {}
+
+export interface filtro {
+     nome: string | null;
+     tipo: string | null;
+     localizacao_cidade: string | null;
+     localizacao_rua: string | null;
+     abertura: string | null;
+     fechamento: string | null;
+     dias_funcionamento: string | null;
+}
