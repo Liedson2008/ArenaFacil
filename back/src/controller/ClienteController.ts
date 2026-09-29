@@ -26,6 +26,21 @@ const login = async (req: Request<{}, {}, { email: string, senha: string }>, res
     }
 }
 
+const agendamentos = async (req: Request, res: Response) => {
+    const cliente_id = 1;
+    const { status } = req.query;
+    const arrayStatus = Array.isArray(status) ? status : (status ? [status] : ['pendente', 'cancelado', 'confirmado', 'finalizado'])
+
+    try {
+        const [resposta] = await clienteModel.agendamentos(cliente_id, arrayStatus as string[])
+        return res.status(200).json({ resposta })
+
+    } catch (error) {
+        console.error('erro no servidor', error)
+        res.status(500).json({ message: 'error no servidor, porfavor tente novamente masi tarde' })
+    }
+}
+
 //PUSH
 
 const agendarQuadra = async (req: Request<{ quadra_id: number }, {}, { data_inicio: string, data_fim: string, valor_total: number }>, res: Response) => {
@@ -63,6 +78,22 @@ const criarConta = async (req: Request<{}, {}, clienteBase>, res: Response) => {
 
 //PUT
 
+const cancelarAgendamento = async (req: Request<{ id: number }, {}, { statusAtual: string }>, res: Response) => {
+    const { statusAtual } = req.body;
+    const { id } = req.params;
+    if (statusAtual === 'finalizado') {
+        return res.status(401).json({ message: 'nao e possivel cancelar um agendamento ja finalizado' })
+    }
+    try {
+        const rowsAfetadas = await clienteModel.cancelarAgendamento(id)
+        if (rowsAfetadas < 1) { return res.status(400).json({ message: 'agendamento nao encontrado' }) }
+
+        return res.status(200).json({ message: 'agendamento cancelado com sucesso' })
+    } catch (error) {
+        console.error("serro no servidor", error)
+        return res.status(500).json({ message: 'erro no servidor, porfavor tente novamente mais tarde' });
+    }
+}
 
 //DELETE
 
@@ -71,6 +102,8 @@ const criarConta = async (req: Request<{}, {}, clienteBase>, res: Response) => {
 const clienteController = {
     criarConta,
     login,
-    agendarQuadra
+    agendarQuadra,
+    agendamentos,
+    cancelarAgendamento
 }
 export default clienteController;

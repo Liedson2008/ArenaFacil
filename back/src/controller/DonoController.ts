@@ -25,14 +25,16 @@ const login = async (req: Request<{}, {}, { email: string; senha: string }>, res
     }
 }
 
-const agendamentosPendentes = async (req: Request, res: Response) => {
-    const dono_id = 1;
+const agendamentos = async (req: Request, res: Response) => {
+    const dono_id = req.usuario!.id;
+    const { status } = req.query;
+    const arrayStatus = Array.isArray(status) ? status : ( status ? [status] : ['pendente', 'confirmado', 'cancelado', 'finalizado'])
     try {
-        const agendamentos = await donoModel.agendamentosPendentes(dono_id);
+        const agendamentos = await donoModel.agendamentos(dono_id, arrayStatus as string[]);
         return res.status(200).json(agendamentos);
     } catch (error) {
         console.error('erro no servidor', error);
-        return res.status(500).json({ menssage: 'erro no servidor tente novamente masi tarde' });
+        return res.status(500).json({ message: 'erro no servidor, por favor tente novamente mais tarde' });
     }
 }
 
@@ -57,13 +59,68 @@ const criarConta = async (req: Request<{}, {}, donoBase>, res: Response) => {
 
 //PUT
 
+const editarAgendamento = async (req: Request<{ id: string }, {}, { status: string, statusAtual: string }>, res: Response) => {
+    const { id } = req.params;
+    const { status, statusAtual } = req.body;
+    if(statusAtual === 'finalizado') {
+        return res.status(401).json({message: 'nao e possivel alterar um agendamento finalizado'})
+    }
+    try {
+        if (status !== 'confirmado' && status !== 'cancelado' && status !== 'finalizado') {
+            return res.status(400).json({ message: 'status informado para a alteração do agendamento é invalido, envie um satatus valido' });
+        }
+        if (status === 'confirmado') {
+            const linhasAfetatdas = await donoModel.editarAgendamento(Number(id), status);
+            if (linhasAfetatdas < 1) {
+                return res.status(404).json({ message: 'agendamento nao encontrado' });
+            }
+            return res.status(200).json({ message: 'agendamento confirmado com sucesso' });
+        }
+        if (status === 'finalizado') {
+            const linhasAfetadas = await donoModel.editarAgendamento(Number(id), status);
+            if(linhasAfetadas < 1) {
+               return res.status(404).json({ message: 'agendamento nao encontrado' });
+            }
+             return res.status(200).json({ message: 'agendamento finalizado com sucesso' });
+        }
+        if (status === 'cancelado') {
+            const linhasAfetadas = await donoModel.cancelarAgendamento(Number(id));
+            if (linhasAfetadas < 1) {
+                return res.status(404).json({ message: 'agendamento nao encontrado' });
+            }
+            return res.status(200).json({ message: 'agendamento cancelado com sucesso' });
+        }
+
+    }catch (error) {
+        console.error('erro no servidor', error);
+        return res.status(500).json({ message: 'erro no servidor, por favor tente novamente mais tarde' });
+    }
+}
+
 //DELETE
+
+const apagarQuadra = async (req: Request<{quadra_id: string}, {}, {}>, res: Response) => {
+    const { quadra_id } = req.params;
+    const dono_id = req.usuario!.id;
+    const status = ["confirmado", "pendente"]
+    const agendamentos = await donoModel.verificarParaDelete(status as string[], Number(quadra_id))
+    if(agendamentos.length > 0) {
+        return res.status(400).json({ message: 'nao e possivel apagar uma quadra que tenha agendamentos pendentes' })
+    }
+    const linhasAfetadas = await donoModel.apagarQuadra(Number(quadra_id), dono_id)
+    if(linhasAfetadas < 1) {
+        return res.status(404).json({ message: 'quadra nao encontra' })
+    }
+    return res.status(200).json({ message: 'quadra apagada com sucesso'})
+} 
 
 //EXPORTS
 
 const donoController = {
     criarConta,
     login,
-    agendamentosPendentes
+    agendamentos,
+    editarAgendamento,
+    apagarQuadra
 }
 export default donoController;
